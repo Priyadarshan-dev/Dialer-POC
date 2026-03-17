@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
@@ -5,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'package:dialer_app_poc/providers.dart';
 import 'package:dialer_app_poc/core/constants/app_constants.dart';
 import 'package:dialer_app_poc/features/call_history/domain/entities/call_history_entity.dart';
+import 'package:dialer_app_poc/core/services/notification_service.dart';
 
 class ContactsScreen extends ConsumerWidget {
   const ContactsScreen({super.key});
@@ -198,6 +200,12 @@ class ContactsScreen extends ConsumerWidget {
     print('[DEBUG] ContactsScreen: Initiating direct call to $phoneNumber');
     final res = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
     print('[DEBUG] ContactsScreen: Direct call result: $res');
+    
+    // 3. iOS Workaround: Show a persistent notification reminder
+    if (res == true) {
+       print('[DEBUG] ContactsScreen: Call successful, showing notification reminder');
+       await NotificationService().showCallReminder(contact.displayName);
+    }
     
     if (res == false && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
