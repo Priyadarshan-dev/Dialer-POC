@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String appName = 'CRM Dialer';
+  static const String appName = 'Liquid Dialer';
   
   // Hive Box Names
   static const String callHistoryBox = 'call_history_box';
