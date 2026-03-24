@@ -5,6 +5,8 @@ import 'package:dialer_app_poc/app.dart';
 import 'package:dialer_app_poc/core/constants/app_constants.dart';
 import 'package:dialer_app_poc/features/call_history/data/models/call_history_model.dart';
 import 'package:dialer_app_poc/core/services/notification_service.dart';
+import 'package:dialer_app_poc/core/services/call_screening_service.dart';
+import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +22,11 @@ void main() async {
 
   // Initialize Notifications
   await NotificationService().init();
+  
+  // Initialize Call Screening for Android
+  if (Platform.isAndroid) {
+    await CallScreeningService.initializeCallScreening();
+  }
   
   runApp(
     const ProviderScope(

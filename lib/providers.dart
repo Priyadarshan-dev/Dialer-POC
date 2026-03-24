@@ -14,6 +14,7 @@ import 'package:dialer_app_poc/features/contacts/domain/repositories/contact_rep
 import 'package:dialer_app_poc/features/contacts/domain/usecases/get_contacts_usecase.dart';
 import 'package:dialer_app_poc/features/contacts/presentation/providers/contacts_provider.dart';
 import 'package:dialer_app_poc/features/contacts/presentation/states/contacts_state.dart';
+import 'package:dialer_app_poc/core/services/call_directory_service.dart';
 
 // --- Contacts Providers ---
 
@@ -77,6 +78,10 @@ final markCompletedUseCaseProvider = Provider<MarkCompletedUseCase>((ref) {
   return MarkCompletedUseCase(repository);
 });
 
+final callDirectoryServiceProvider = Provider<CallDirectoryService>((ref) {
+  return CallDirectoryService();
+});
+
 final callHistoryProvider = StateNotifierProvider<CallHistoryNotifier, CallHistoryState>((ref) {
   return CallHistoryNotifier(
     getAllCallsUseCase: ref.watch(getAllCallsUseCaseProvider),
@@ -84,5 +89,6 @@ final callHistoryProvider = StateNotifierProvider<CallHistoryNotifier, CallHisto
     updateCallNotesUseCase: ref.watch(updateCallNotesUseCaseProvider),
     deleteCallUseCase: ref.watch(deleteCallUseCaseProvider),
     markCompletedUseCase: ref.watch(markCompletedUseCaseProvider),
+    callDirectoryService: ref.watch(callDirectoryServiceProvider),
   );
 });

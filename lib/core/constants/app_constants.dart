@@ -4,6 +4,15 @@ class AppConstants {
   // Hive Box Names
   static const String callHistoryBox = 'call_history_box';
   
+  // iOS Call Directory Constants
+  static const String appGroupId = 'group.com.liquid.dialer.shared';
+  static const String callDirectoryFileName = 'call_directory_data.json';
+  
+  // Android Call Screening Constants
+  static const String callScreeningChannel = 'com.liquid.dialer/call_screening';
+  static const String getCallNotesMethod = 'getCallNotes';
+  static const String syncCallDirectoryMethod = 'syncCallDirectory';
+  
   // Permissions Strings
   static const String contactsPermissionDenied = 'Contacts permission is required to use this app.';
   static const String callPermissionDenied = 'Call permission is required to make calls.';
