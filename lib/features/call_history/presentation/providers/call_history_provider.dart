@@ -7,7 +7,6 @@ import 'package:dialer_app_poc/features/call_history/presentation/states/call_hi
 import 'package:dialer_app_poc/core/services/call_directory_service.dart';
 import 'package:dialer_app_poc/core/services/call_screening_service.dart';
 import 'package:dialer_app_poc/core/services/shared_preferences_service.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'dart:io';
 
 class CallHistoryNotifier extends StateNotifier<CallHistoryState> {
@@ -52,7 +51,6 @@ class CallHistoryNotifier extends StateNotifier<CallHistoryState> {
           calls: sortedCalls,
           pendingCalls: pending,
         );
-        _updateBadgeCount(pending.length);
       },
     );
   }
@@ -174,13 +172,6 @@ class CallHistoryNotifier extends StateNotifier<CallHistoryState> {
     );
   }
 
-  void _updateBadgeCount(int count) {
-    if (count > 0) {
-      FlutterAppBadger.updateBadgeCount(count);
-    } else {
-      FlutterAppBadger.removeBadge();
-    }
-  }
 
   Future<void> _syncToAndroidCallScreening() async {
     await CallScreeningService.syncCallDirectory();

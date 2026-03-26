@@ -23,22 +23,49 @@ class _CRMAppState extends ConsumerState<CRMApp> with WidgetsBindingObserver {
   bool _isShowingPopup = false;
   DateTime? _lastResumeTime;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _initApp();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addObserver(this);
+  //   _initApp();
+  // }
 
-  Future<void> _initApp() async {
-    print('[DEBUG] App: Initializing app and requesting permissions...');
-    await Permission.contacts.request();
+  // Future<void> _initApp() async {
+  //   print('[DEBUG] App: Initializing app and requesting permissions...');
+  //   await Permission.contacts.request();
     
-    if (mounted) {
-      ref.read(contactsProvider.notifier).loadContacts();
-      ref.read(callHistoryProvider.notifier).loadCalls();
-    }
+  //   if (mounted) {
+  //     ref.read(contactsProvider.notifier).loadContacts();
+  //     ref.read(callHistoryProvider.notifier).loadCalls();
+  //   }
+  // }
+
+  @override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addObserver(this);
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _initApp(); // ✅ run AFTER UI is ready
+  });
+}
+
+Future<void> _initApp() async {
+  print('[DEBUG] App: Initializing app...');
+
+  // Wait for the native rootViewController to be fully ready on iOS
+  await Future.delayed(const Duration(milliseconds: 500));
+
+  // Explicitly request contacts permission before loading contacts
+  print('[DEBUG] App: Requesting Contacts permission...');
+  final status = await Permission.contacts.request();
+  print('[DEBUG] App: Contacts permission status: $status');
+
+  if (mounted) {
+    ref.read(contactsProvider.notifier).loadContacts();
+    ref.read(callHistoryProvider.notifier).loadCalls();
   }
+}
 
   @override
   void dispose() {

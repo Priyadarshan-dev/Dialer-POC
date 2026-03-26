@@ -1,12 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:dialer_app_poc/providers.dart';
 import 'package:dialer_app_poc/core/constants/app_constants.dart';
 import 'package:dialer_app_poc/features/call_history/domain/entities/call_history_entity.dart';
 import 'package:dialer_app_poc/core/services/notification_service.dart';
+import 'package:dialer_app_poc/features/contacts/presentation/screens/dialpad_screen.dart';
 
 class ContactsScreen extends ConsumerWidget {
   const ContactsScreen({super.key});
@@ -46,6 +47,17 @@ class ContactsScreen extends ConsumerWidget {
             child: _buildBody(context, ref, state),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const DialpadScreen()),
+          );
+        },
+        backgroundColor: const Color(0xFF6366F1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.dialpad_rounded, color: Colors.white),
       ),
     );
   }
@@ -198,12 +210,16 @@ class ContactsScreen extends ConsumerWidget {
 
     // 2. Launch call
     print('[DEBUG] ContactsScreen: Initiating direct call to $phoneNumber');
+    
+    // On iOS, the app might be suspended immediately. Let's fire the notification 
+    // slightly before or right after the call request without strictly waiting for 'res'.
     final res = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
     print('[DEBUG] ContactsScreen: Direct call result: $res');
     
     // 3. iOS Workaround: Show a persistent notification reminder
-    if (res == true) {
-       print('[DEBUG] ContactsScreen: Call successful, showing notification reminder');
+    // We check if res is true OR if we are on iOS (where res can sometimes be null/delayed)
+    if (res == true || Platform.isIOS) {
+       print('[DEBUG] ContactsScreen: Call initiated (res=$res), showing notification reminder');
        await NotificationService().showCallReminder(contact.displayName);
     }
     

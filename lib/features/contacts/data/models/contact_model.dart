@@ -16,8 +16,8 @@ class ContactModel {
 
   factory ContactModel.fromFlutterContact(Contact contact) {
     return ContactModel(
-      id: contact.id,
-      displayName: contact.displayName,
+      id: contact.id ?? '',
+      displayName: contact.displayName ?? 'Unknown',
       phoneNumbers: contact.phones.map((p) => p.number).toList(),
       photoUrl: contact.photo != null ? 'has_photo' : null, // Not storing actual bytes here for simplicity
     );

@@ -9,16 +9,18 @@ class ContactRepositoryImpl implements ContactRepository {
 
   ContactRepositoryImpl(this.localDataSource);
 
-  @override
-  Future<Either<Failure, List<ContactEntity>>> getContacts() async {
-    try {
-      final models = await localDataSource.getContacts();
-      return Right(models.map((m) => m.toEntity()).toList());
-    } catch (e) {
-      if (e.toString().contains('Permission denied')) {
-        return Left(PermissionFailure('Contacts permission denied'));
-      }
-      return Left(DeviceFailure(e.toString()));
+@override
+Future<Either<Failure, List<ContactEntity>>> getContacts() async {
+  try {
+    final models = await localDataSource.getContacts();
+    return Right(models.map((m) => m.toEntity()).toList());
+  } catch (e) {
+    print('[DEBUG] ContactRepository: ACTUAL ERROR → $e'); // ← ADD THIS LINE
+    print('[DEBUG] ContactRepository: ERROR TYPE → ${e.runtimeType}'); // ← ADD THIS LINE
+    if (e.toString().contains('Permission denied')) {
+      return Left(PermissionFailure('Contacts permission denied'));
     }
+    return Left(DeviceFailure(e.toString()));
   }
+}
 }

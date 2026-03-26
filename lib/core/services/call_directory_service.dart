@@ -11,17 +11,29 @@ class CallDirectoryService {
   /// and notes, and sends them to the native iOS side via Method Channel.
   Future<void> syncData(List<CallHistoryEntity> calls) async {
     try {
-      // 1. Create a map of PhoneNumber -> Note
+      // 1. Create a map of PhoneNumber -> Latest Note
       // Only include numbers that have notes.
       final Map<String, String> data = {};
       
-      for (var call in calls) {
-        if (call.notes != null && call.notes!.isNotEmpty) {
-          // Clean the phone number (remove non-digits except possibly a leading +)
-          final cleanedNumber = _formatPhoneNumber(call.phoneNumber);
-          if (cleanedNumber.isNotEmpty) {
-            // We prepend the app name to the note for better visibility on the call screen
-            data[cleanedNumber] = '${AppConstants.appName}: ${call.notes}';
+      // Sort oldest to newest so that latest entries naturally overwrite older ones in the Map.
+      final sortedCalls = List<CallHistoryEntity>.from(calls)
+        ..sort((a, b) => a.callTime.compareTo(b.callTime));
+      
+      for (var call in sortedCalls) {
+        if (call.notes != null && call.notes!.trim().isNotEmpty) {
+          final rawDigits = _formatPhoneNumber(call.phoneNumber);
+          if (rawDigits.isNotEmpty) {
+            final note = call.notes!.trim();
+            
+            // variant 1: Plain digits (e.g. 9876543210)
+            data[rawDigits] = 'NOTES (Plain) : $note';
+            
+            // variant 2: With India Prefix (e.g. 919876543210)
+            // Only add if the number doesn't already start with 91 and is 10 digits
+            if (rawDigits.length == 10) {
+              final prefixed = '91$rawDigits';
+              data[prefixed] = 'NOTES (+91) : $note';
+            }
           }
         }
       }

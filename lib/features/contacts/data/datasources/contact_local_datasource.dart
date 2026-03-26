@@ -9,38 +9,35 @@ abstract class ContactLocalDataSource {
 class ContactLocalDataSourceImpl implements ContactLocalDataSource {
   @override
   Future<List<ContactModel>> getContacts() async {
-    print('[DEBUG] ContactLocalDataSource: Checking contacts permission status...');
-    
-    // Check current status
-    var status = await ph.Permission.contacts.status;
-    print('[DEBUG] ContactLocalDataSource: Current permission status: $status');
+    print('[DEBUG] ContactLocalDataSource: Checking contacts permission...');
 
-    if (status.isDenied) {
-      print('[DEBUG] ContactLocalDataSource: Permission denied, requesting...');
-      status = await ph.Permission.contacts.request();
-      print('[DEBUG] ContactLocalDataSource: Request result: $status');
-    }
+    // ✅ Use permission_handler to check status (already requested in app.dart)
+    final status = await ph.Permission.contacts.status;
+    print('[DEBUG] ContactLocalDataSource: Permission status: $status');
 
     if (status.isPermanentlyDenied) {
-      print('[DEBUG] ContactLocalDataSource: Permission permanently denied. Redirecting to settings?');
-      // We can't easily open settings automatically here without more context,
-      // but we should throw a specific message.
+      print('[DEBUG] ContactLocalDataSource: Permission permanently denied.');
       throw Exception('Permission permanently denied. Please enable in settings.');
     }
 
-    if (status.isGranted) {
-      print('[DEBUG] ContactLocalDataSource: Permission granted. Fetching contacts...');
-      // Even if granted by permission_handler, flutter_contacts might need its own initialization if any
-      // but usually it works directly if permission is granted.
-      final contacts = await FlutterContacts.getContacts(
-        withProperties: true,
-        withPhoto: false,
-      );
-      print('[DEBUG] ContactLocalDataSource: Successfully fetched ${contacts.length} contacts');
-      return contacts.map((c) => ContactModel.fromFlutterContact(c)).toList();
-    } else {
-      print('[DEBUG] ContactLocalDataSource: Permission NOT granted (Status: $status)');
-      throw Exception('Contacts permission is required to use this app.');
+    if (!status.isGranted) {
+      print('[DEBUG] ContactLocalDataSource: Permission not granted: $status');
+      throw Exception('Contacts permission denied. Please enable in settings.');
     }
+
+    print('[DEBUG] ContactLocalDataSource: Permission granted. Fetching contacts...');
+
+    // ✅ Directly fetch contacts with phone numbers — 2.0.1 defaults to only IDs/names
+    final contacts = await FlutterContacts.getAll(
+      properties: {ContactProperty.phone},
+    );
+
+    print('[DEBUG] ContactLocalDataSource: Successfully fetched ${contacts.length} contacts');
+
+    return contacts.map((c) {
+      print('[DEBUG] Mapping contact: ${c.id}');
+      return ContactModel.fromFlutterContact(c);
+    }).toList();
   }
 }
+
